@@ -63,7 +63,9 @@ export function scenePreset(scene: Partial<Scene>) {
 }
 export function applyPreset(scene: Scene, presetId: string): Scene {
   const preset = presets.find(p => p.id === presetId) || presets[0]
+  const wasDefaultName = scene.name === scenePreset(scene).name
   return { ...scene, presetId: preset.id, composition: preset.composition, align: preset.align,
+    name: wasDefaultName ? preset.name : scene.name,
     headings: Array.from({ length: preset.headings }, (_, i) => scene.headings[i] || (i ? '自然发生。' : '让想法，被看见。')),
     texts: Array.from({ length: preset.texts }, (_, i) => scene.texts[i] || '留一点空间，让内容自然发生。'),
     photos: scene.photos.slice(0, preset.photos), videoId: preset.composition === 'cinema' ? scene.videoId : undefined,

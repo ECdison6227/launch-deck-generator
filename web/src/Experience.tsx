@@ -21,13 +21,13 @@ const VantaBackdrop = lazy(() => import('./VantaBackdrop'))
 export type ExperienceHandle = { next: () => void; previous: () => void; goTo: (index: number) => void; replay: () => void }
 export const pauseMedia = () => document.querySelectorAll<HTMLVideoElement>('video').forEach(v => v.pause())
 
-function AmbientBackground({ project, reduced }: { project: Project; reduced: boolean }) {
+function AmbientBackground({ project, reduced, suspended }: { project: Project; reduced: boolean; suspended: boolean }) {
   const background = project.background
-  const paused = background.paused || reduced
+  const paused = background.paused || reduced || suspended
   const speed = paused ? 0 : background.speed
   if (background.kind === 'solid') return <div className="ambient-background" style={{ backgroundColor: background.colors[0] }} />
   if (background.kind === 'clouds' || background.kind === 'clouds2') return <div className="ambient-background" style={{ backgroundColor: background.colors[0] }}>
-    <Suspense fallback={null}><VantaBackdrop kind={background.kind} colors={background.colors} speed={speed} /></Suspense>
+    <Suspense fallback={null}><VantaBackdrop kind={background.kind} colors={background.colors} speed={background.speed} paused={paused} /></Suspense>
   </div>
   return <div className="ambient-background" style={{ backgroundColor: background.colors[0] }}>
     {background.kind === 'grain' && <GrainGradient width="100%" height="100%" colorBack={background.colors[0]} colors={background.colors.slice(1)} speed={speed * 1.4 || 0} softness={0.7} intensity={0.18} noise={0.5} shape="wave" minPixelRatio={1} maxPixelCount={518400} />}
@@ -49,10 +49,15 @@ function SceneContent({ scene, urls, animate, replay, reduced }: { scene: Scene;
     courier: '"Courier New", Courier, monospace',
   }[scene.font || 'sans']
   const hasMotion = animate && scene.motion && !reduced
+  const ink = scene.textColor || '#30384b'
+  const brightness = [0.2126, 0.7152, 0.0722].reduce((sum, weight, i) => sum + weight * parseInt(ink.slice(1 + i * 2, 3 + i * 2), 16), 0)
+  // 已有浅色主题的深色文字，在谢幕黑场上自动使用浅色；保留可读的自选颜色。
+  const displayInk = scene.composition === 'outro' && brightness < 128 ? '#f4f6fa' : ink
   const effect = scene.photoEffect || 'still'
   const titleEffect = scene.textEffect === 'fade' ? null : scene.textEffect
   const interactivePhotos = scene.motion && !reduced && (effect === 'float' || effect === 'lift')
-  return <section style={{ fontFamily: font, '--scene-ink': scene.textColor || '#30384b' } as CSSProperties} className={`scene-content preset-${preset.id} composition-${scene.composition} align-${scene.align} photo-count-${preset.photos}`} data-scene-id={scene.id}>
+  return <section style={{ fontFamily: font, '--scene-ink': displayInk } as CSSProperties} className={`scene-content preset-${preset.id} composition-${scene.composition} align-${scene.align} photo-count-${preset.photos}`} data-scene-id={scene.id}>
+    {scene.composition === 'outro' && <div className="outro-stage" aria-hidden="true" />}
     <div className="scene-copy">
       <div className="headings-group">{scene.headings.map((text, i) => <div key={i} role="heading" aria-level={i + 1} className={`scene-heading heading-${i + 1}`} data-text-kind="heading" style={{ '--text-length': Math.max(1, ...text.split('\n').map(line => Array.from(line).length)) } as CSSProperties}>
         {hasMotion ? titleEffect === null ? <motion.span className="plain-heading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.45, delay: i * 0.06, ease: 'easeOut' }}>{text}</motion.span> : text.split('\n').map((line, lineIndex) => <BlurText key={`${scene.id}-${replay}-${lineIndex}`} text={line || ' '} trigger="load" animateBy="letters" delay={i === 0 ? 36 : 46} effect={titleEffect} direction="bottom" distance={22} blur={10} stepDuration={0.36} className="animated-line" />) : <span className="plain-heading">{text}</span>}
@@ -70,7 +75,7 @@ function SceneContent({ scene, urls, animate, replay, reduced }: { scene: Scene;
     {scene.videoId && <div className="scene-video-slot"><video className="scene-video" src={urls[scene.videoId]} poster={urls[scene.posterId || '']} muted={scene.muted} loop={scene.loop} controls playsInline preload="metadata" /></div>}
     {scene.composition === 'chart' && scene.chart && <Suspense fallback={<Card className="scene-chart scene-chart-loading"><CardContent>图表载入中…</CardContent></Card>}><SceneChartView chart={scene.chart} ink={scene.textColor || '#30384b'} animate={hasMotion} /></Suspense>}
     {scene.composition === 'table' && scene.table && <Card className="scene-table"><CardContent><Table><TableHeader><TableRow>{scene.table[0]?.map((cell, i) => <TableHead key={i}>{cell}</TableHead>)}</TableRow></TableHeader><TableBody>{scene.table.slice(1).map((row, i) => <TableRow key={i}>{row.map((cell, j) => <TableCell key={j}>{cell}</TableCell>)}</TableRow>)}</TableBody></Table></CardContent></Card>}
-    {scene.composition === 'outro' && animate && <motion.div className="outro-veil" initial={{ opacity: 0 }} animate={{ opacity: scene.motion && !reduced ? 1 : 0 }} transition={{ duration: 2.6, delay: 1.8, ease: [0.45, 0, 0.55, 1] }} key={`${scene.id}-${replay}-veil`} aria-hidden="true" />}
+    {scene.composition === 'outro' && hasMotion && <motion.div className="outro-veil" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.4, delay: 2.2, ease: [0.45, 0, 0.55, 1] }} key={`${scene.id}-${replay}-veil`} aria-hidden="true" />}
   </section>
 }
 
@@ -83,9 +88,9 @@ const swiperEffects = {
 export const Experience = forwardRef<ExperienceHandle, { project: Project; urls: Record<string, string>; editing?: boolean; activeIndex: number; onIndexChange: (index: number) => void; keyboard?: boolean }>(function Experience({ project, urls, editing = false, activeIndex, onIndexChange, keyboard = true }, ref) {
   const swiperRef = useRef<SwiperInstance | null>(null)
   const [replay, setReplay] = useState(0)
-  // 编辑状态下点「重新感受这一屏」：短暂允许动效，播完自动回归"编辑时静止"，并保持编辑框打开。
-  const [forcePlay, setForcePlay] = useState(false)
-  const forceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // 预览属于当前内容；编辑内容或切屏后失效，结束黑幕不会被固定计时器突然掀开。
+  const [previewScene, setPreviewScene] = useState<Scene | null>(null)
+  const activeScene = project.scenes[activeIndex]
   const [reduced, setReduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -93,9 +98,7 @@ export const Experience = forwardRef<ExperienceHandle, { project: Project; urls:
     media.addEventListener('change', change)
     return () => media.removeEventListener('change', change)
   }, [])
-  // 编辑模式切换时取消预览态；离开页面时清理定时器。
-  useEffect(() => () => { if (forceTimer.current) clearTimeout(forceTimer.current) }, [])
-  useEffect(() => { if (!editing) setForcePlay(false) }, [editing])
+  useEffect(() => { setPreviewScene(null) }, [editing, activeIndex])
   const transitionSpeed = reduced ? 0 : project.transition === 'fade' ? 450 : 850
   useEffect(() => { if (swiperRef.current && swiperRef.current.activeIndex !== activeIndex) swiperRef.current.slideTo(activeIndex, editing ? 0 : transitionSpeed) }, [activeIndex, editing, transitionSpeed])
   useImperativeHandle(ref, () => ({
@@ -104,11 +107,9 @@ export const Experience = forwardRef<ExperienceHandle, { project: Project; urls:
     goTo: index => swiperRef.current?.slideTo(index),
     replay: () => {
       setReplay(n => n + 1)
-      setForcePlay(true)
-      if (forceTimer.current) clearTimeout(forceTimer.current)
-      forceTimer.current = setTimeout(() => setForcePlay(false), 3500)
+      setPreviewScene(activeScene)
     },
-  }), [])
+  }), [activeScene])
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement
@@ -120,9 +121,9 @@ export const Experience = forwardRef<ExperienceHandle, { project: Project; urls:
   }, [keyboard, editing])
   const effect = swiperEffects[project.transition] || swiperEffects.fade
   return <div className={`experience transition-${project.transition} ${editing ? 'experience-editing' : ''}`} data-testid="experience">
-    <AmbientBackground project={project} reduced={reduced} />
+    <AmbientBackground project={project} reduced={reduced} suspended={editing || activeScene?.composition === 'outro'} />
     <div className="experience-pages"><Swiper key={project.transition} modules={[A11y, Keyboard, Mousewheel, ...effect.modules]} direction={project.transition === 'cards' ? 'horizontal' : 'vertical'} speed={transitionSpeed} initialSlide={activeIndex} keyboard={{ enabled: keyboard && !editing }} mousewheel={{ enabled: keyboard && !editing, forceToAxis: project.transition !== 'cards', thresholdDelta: 35, thresholdTime: 750 }} allowTouchMove={!editing} {...effect.props} onSwiper={swiper => { swiperRef.current = swiper }} onBeforeSlideChangeStart={pauseMedia} onSlideChange={swiper => { pauseMedia(); onIndexChange(swiper.activeIndex) }} a11y={{ enabled: true, containerMessage: '流动网页，使用方向键切换场景', slideLabelMessage: '第 {{index}} 屏，共 {{slidesLength}} 屏' }}>
-      {project.scenes.map(scene => <SwiperSlide key={scene.id}>{({ isActive }) => isActive ? <SceneContent key={`${scene.id}-${replay}`} scene={scene} urls={urls} animate={!editing || forcePlay} replay={replay} reduced={reduced} /> : null}</SwiperSlide>)}
+      {project.scenes.map(scene => <SwiperSlide key={scene.id}>{({ isActive }) => isActive ? <SceneContent key={`${scene.id}-${replay}`} scene={scene} urls={urls} animate={!editing || previewScene === scene} replay={replay} reduced={reduced} /> : null}</SwiperSlide>)}
     </Swiper></div>
   </div>
 })

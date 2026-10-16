@@ -13,8 +13,9 @@ export async function pruneUnusedMedia() {
       for (const id of [s.imageId, s.videoId, s.posterId, ...(s.cards || []).map(c => c.imageId)]) if (id) referenced.add(id)
     })
   }
-  const all = await db.media.toArray()
-  const orphan = all.map(m => m.id).filter(id => !referenced.has(id))
+  // 只读取主键，避免每次保存都把全部图片和视频 Blob 再载入内存。
+  const ids = await db.media.toCollection().primaryKeys()
+  const orphan = ids.filter(id => !referenced.has(id))
   if (orphan.length) await db.media.bulkDelete(orphan)
   return orphan.length
 }

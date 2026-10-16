@@ -1,7 +1,7 @@
 import type { Project, Scene, BackgroundKind, SlideTransition } from './model'
 export interface AgentImage { name?: string; dataUrl: string }
 export interface ScenePatch {
-  scene: number; presetId?: string; headings?: string[]; texts?: string[]; footnote?: string
+  scene: number; presetId?: string; name?: string; headings?: string[]; texts?: string[]; footnote?: string
   font?: Scene['font']; textColor?: string; textEffect?: Scene['textEffect']; photoEffect?: Scene['photoEffect']; motion?: boolean
   images?: (string | AgentImage)[]; video?: string | AgentImage
   chart?: { categories?: string[]; series?: { label?: string; values: number[]; color?: string }[] }

@@ -58,9 +58,10 @@
 .preset-chart-full .scene-copy { top: 13%; }
 .preset-chart-full .scene-notes { margin-top: 8px; }
 .composition-outro .scene-copy { position: absolute; inset: 0; width: 100%; left: 0; transform: none; display: grid; place-content: center; text-align: center; }
-.composition-outro .scene-heading { font-size: clamp(48px, min(8cqw, calc(70cqw / var(--text-length, 6))), 132px); }
+.composition-outro .scene-heading { font-size: clamp(48px, min(8cqw, calc(70cqw / var(--text-length, 6))), 132px); text-shadow: 0 0 28px rgba(255, 244, 220, 0.18), 0 0 6px rgba(255, 255, 255, 0.12); letter-spacing: 0.02em; }
 .composition-outro .animated-line { justify-content: center; }
-.outro-veil { position: absolute; inset: 0; background: #05070b; z-index: 6; pointer-events: none; }
+.outro-stage { position: absolute; inset: 0; background: radial-gradient(ellipse at center 45%, #10131a 0%, #06080d 60%, #000 100%); pointer-events: none; }
+.outro-veil { position: absolute; inset: 0; background: #000; z-index: 6; pointer-events: none; }
 .composition-film .scene-copy, .preset-film .scene-copy { display: none; }
 .preset-film .scene-video-slot { inset: 0; width: 100%; height: 100%; border-radius: 0; box-shadow: none; }
 .preset-film .scene-video { object-fit: cover; }

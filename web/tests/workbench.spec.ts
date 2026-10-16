@@ -12,13 +12,14 @@ const saved = (page: Page) =>
   ).toBeVisible();
 const go = async (page: Page, index: number) => {
   await page
-    .getByRole("button", { name: new RegExp(`^第 ${index} 屏：`) })
+    .getByRole("button", { name: `第 ${index} 屏`, exact: true })
     .click();
+  await expect(page.locator(".swiper-slide").nth(index - 1)).toHaveClass(/swiper-slide-active/);
   await expect(current(page)).toHaveAttribute("data-scene-id", /.+/);
 };
 const edit = async (page: Page) => {
   await page.getByRole("button", { name: "编辑当前屏", exact: true }).click();
-  await expect(page.getByRole("textbox", { name: "场景名称" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "内容", exact: true })).toBeVisible();
   await expect
     .poll(() =>
       page
@@ -47,6 +48,81 @@ test.beforeEach(async ({ page }) => {
 });
 test.afterEach(async ({ page }) => {
   expect(errors.get(page)).toEqual([]);
+});
+
+const cloudFrame = (page: Page) => page.evaluate(() => {
+  const effect = (window as unknown as {
+    VANTA?: { current?: { req?: number; renderer?: { info: { render: { frame: number } } } } }
+  }).VANTA?.current;
+  return { running: effect?.req !== undefined, frame: effect?.renderer?.info.render.frame ?? -1 };
+});
+
+test("云朵限制高分屏像素，编辑和暂停时停止渲染并可原地恢复", async ({ browser, page: editor }) => {
+  await editor.goto("about:blank");
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
+  try {
+    const page = await context.newPage();
+    await page.goto("/");
+    const canvas = page.locator(".vanta-backdrop canvas");
+    await expect(canvas).toHaveCount(1);
+    await canvas.evaluate(el => { el.dataset.persist = "cloud"; });
+    const pixels = await canvas.evaluate(el => (el as HTMLCanvasElement).width * (el as HTMLCanvasElement).height);
+    expect(pixels).toBeLessThanOrEqual(230400);
+    await expect.poll(async () => (await cloudFrame(page)).frame).toBeGreaterThan(1);
+    await edit(page);
+    await expect.poll(async () => (await cloudFrame(page)).running).toBe(false);
+    const frozen = (await cloudFrame(page)).frame;
+    await page.waitForTimeout(180);
+    expect((await cloudFrame(page)).frame).toBe(frozen);
+    await page.getByRole("button", { name: "收起编辑", exact: true }).click();
+    await expect.poll(async () => (await cloudFrame(page)).frame).toBeGreaterThan(frozen);
+    await page.evaluate(() => window.flowAgent!.setBackground({ paused: true }));
+    await expect.poll(async () => (await cloudFrame(page)).running).toBe(false);
+    const paused = (await cloudFrame(page)).frame;
+    await page.waitForTimeout(180);
+    expect((await cloudFrame(page)).frame).toBe(paused);
+    await page.evaluate(() => window.flowAgent!.setBackground({ paused: false, speed: 0 }));
+    await expect.poll(async () => (await cloudFrame(page)).running).toBe(false);
+    await page.evaluate(() => window.flowAgent!.setBackground({ speed: 0.2 }));
+    await expect.poll(async () => (await cloudFrame(page)).running).toBe(true);
+    await expect(canvas).toHaveAttribute("data-persist", "cloud");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect.poll(async () => (await cloudFrame(page)).running).toBe(false);
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await expect.poll(async () => (await cloudFrame(page)).running).toBe(true);
+  } finally {
+    await context.close();
+  }
+});
+
+test("收尾字幕可读并完全渐黑，编辑预览保留面板，换版式不显示旧屏名", async ({ page }) => {
+  await page.evaluate(() => window.flowAgent!.apply({ scene: 1, presetId: "outro", headings: ["谢谢，再会。", "下一程，见。"], textColor: "#30384b" }));
+  await expect(current(page)).toHaveClass(/composition-outro/);
+  await expect(current(page).locator(".scene-heading").first()).toHaveCSS("color", "rgb(244, 246, 250)");
+  await expect(page.locator(".scene-chip.active")).toHaveText("01");
+  await expect.poll(async () => (await cloudFrame(page)).running).toBe(false);
+  await expect(current(page).locator(".outro-veil")).toHaveCSS("opacity", "1");
+  await expect(current(page).locator(".outro-veil")).toHaveCSS("background-color", "rgb(0, 0, 0)");
+  await edit(page);
+  await expect(page.getByRole("textbox", { name: "场景名称" })).toHaveCount(0);
+  await expect(current(page).locator(".outro-veil")).toHaveCount(0);
+  await page.getByRole("tab", { name: "灵动", exact: true }).click();
+  await page.getByRole("button", { name: "重新感受这一屏", exact: true }).click();
+  await expect(current(page).locator(".outro-veil")).toHaveCSS("opacity", "1");
+  await expect(page.locator(".flow-editor")).toBeVisible();
+  await page.getByRole("tab", { name: "内容", exact: true }).click();
+  await page.getByRole("textbox", { name: "主标题 1", exact: true }).fill("编辑后继续可见");
+  await expect(current(page).locator(".outro-veil")).toHaveCount(0);
+  await expect(current(page).locator(".plain-heading").first()).toHaveText("编辑后继续可见");
+  await page.getByRole("button", { name: "换个版式", exact: true }).click();
+  await page.locator(".preset-dialog").getByRole("button", { name: /^趋势图表/ }).click();
+  await page.locator(".preset-dialog").getByRole("button", { name: "应用这个版式", exact: true }).click();
+  await expect(current(page)).toHaveClass(/composition-chart/);
+  await expect(page.locator(".preset-summary strong")).toHaveText("趋势图表");
+  await expect(page.locator(".scene-chip.active")).toHaveText("01");
+  await expect(current(page).locator(".outro-stage,.outro-veil")).toHaveCount(0);
+  await page.getByRole("button", { name: "收起编辑", exact: true }).click();
+  await expect.poll(async () => (await cloudFrame(page)).running).toBe(true);
 });
 
 test("默认轻淡入与静置图片，轻浮按屏可选，跨屏背景不重建", async ({
@@ -187,7 +263,10 @@ test("场景新建复制、排序、确认删除和持久化", async ({ page }) 
   await edit(page);
   await page.getByRole("button", { name: "复制这一屏", exact: true }).click();
   await expect(page.locator(".scene-chip")).toHaveCount(5);
-  await page.getByRole("textbox", { name: "场景名称" }).fill("新复制的片刻");
+  // 名称已不再提供输入框，通过 flowAgent 改名验证持久化路径
+  await page.evaluate(() =>
+    window.flowAgent!.apply({ scene: 2, name: "新复制的片刻" }),
+  );
   await page.getByRole("button", { name: "下移场景", exact: true }).click();
   await expect(page.locator(".scene-chip").nth(2)).toHaveAttribute(
     "aria-current",
@@ -195,10 +274,10 @@ test("场景新建复制、排序、确认删除和持久化", async ({ page }) 
   );
   await saved(page);
   await page.reload();
+  await expect
+    .poll(() => page.evaluate(() => window.flowAgent!.inspect()!.scenes[2].name))
+    .toBe("新复制的片刻");
   await edit(page);
-  await expect(page.getByRole("textbox", { name: "场景名称" })).toHaveValue(
-    "新复制的片刻",
-  );
   await page.getByRole("button", { name: "删除这一屏", exact: true }).click();
   await page
     .getByRole("alertdialog")
@@ -399,6 +478,8 @@ test("ZIP 含运行时和媒体，独立来源离线运行、播放视频并可�
     await writeFile(path, data);
   }
   let server: ChildProcess | undefined;
+  // 验证独立播放器时释放编辑器的 WebGL，避免两个上下文争抢截图所需的渲染资源。
+  await page.goto("about:blank");
   const isolated = await browser.newContext({
     viewport: { width: 1440, height: 900 },
   });
@@ -541,6 +622,7 @@ test("ZIP 含运行时和媒体，独立来源离线运行、播放视频并可�
     server?.kill();
     await isolated.close();
   }
+  await page.goto("/");
   await edit(page);
   await page
     .getByRole("textbox", { name: "主标题 1", exact: true })
@@ -609,7 +691,7 @@ test("Agent 一次交出多屏的图片与文字，从零搭出完整网页并�
   expect(third.scene).toBe(7);
   await expect(page.locator(".scene-chip")).toHaveCount(7);
   await expect(
-    page.getByRole("button", { name: /第 5 屏：开门见山/ }),
+    page.getByRole("button", { name: "第 5 屏", exact: true }),
   ).toBeVisible();
   await saved(page);
   await page.reload();
@@ -650,7 +732,7 @@ test("Agent 一次交出多屏的图片与文字，从零搭出完整网页并�
   );
   expect(overflow.addedImages).toBe(1);
   expect(overflow.ignoredImages).toBe(1);
-  await expect(page.getByRole("button", { name: /第 8 屏：/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "第 8 屏", exact: true })).toBeVisible();
 });
 
 test("Agent 接口选择预设、字体颜色与效果，纯单图及文字页自动布局", async ({
