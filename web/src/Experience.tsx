@@ -120,7 +120,7 @@ export const Experience = forwardRef<ExperienceHandle, { project: Project; urls:
     return () => window.removeEventListener('keydown', onKey)
   }, [keyboard, editing])
   const effect = swiperEffects[project.transition] || swiperEffects.fade
-  return <div className={`experience transition-${project.transition} ${editing ? 'experience-editing' : ''}`} data-testid="experience">
+  return <div className={`experience transition-${project.transition}`} data-testid="experience">
     <AmbientBackground project={project} reduced={reduced} suspended={editing || activeScene?.composition === 'outro'} />
     <div className="experience-pages"><Swiper key={project.transition} modules={[A11y, Keyboard, Mousewheel, ...effect.modules]} direction={project.transition === 'cards' ? 'horizontal' : 'vertical'} speed={transitionSpeed} initialSlide={activeIndex} keyboard={{ enabled: keyboard && !editing }} mousewheel={{ enabled: keyboard && !editing, forceToAxis: project.transition !== 'cards', thresholdDelta: 35, thresholdTime: 750 }} allowTouchMove={!editing} {...effect.props} onSwiper={swiper => { swiperRef.current = swiper }} onBeforeSlideChangeStart={pauseMedia} onSlideChange={swiper => { pauseMedia(); onIndexChange(swiper.activeIndex) }} a11y={{ enabled: true, containerMessage: '流动网页，使用方向键切换场景', slideLabelMessage: '第 {{index}} 屏，共 {{slidesLength}} 屏' }}>
       {project.scenes.map(scene => <SwiperSlide key={scene.id}>{({ isActive }) => isActive ? <SceneContent key={`${scene.id}-${replay}`} scene={scene} urls={urls} animate={!editing || previewScene === scene} replay={replay} reduced={reduced} /> : null}</SwiperSlide>)}

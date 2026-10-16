@@ -57,6 +57,39 @@ const cloudFrame = (page: Page) => page.evaluate(() => {
   return { running: effect?.req !== undefined, frame: effect?.renderer?.info.render.frame ?? -1 };
 });
 
+test("编辑浮层开关保持完整画布、背景、字号和内容位置", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const layout = () => page.evaluate(() => {
+    const selectors = [".experience-pages", ".swiper-slide-active .scene-content", ".swiper-slide-active .scene-copy", ".swiper-slide-active .scene-heading", ".swiper-slide-active .scene-small-text", ".swiper-slide-active .photo-field", ".swiper-slide-active .photo-slot", ".swiper-slide-active .outro-stage", ".scene-dock"];
+    return selectors.flatMap(selector => Array.from(document.querySelectorAll(selector), el => {
+      const rect = el.getBoundingClientRect();
+      const style = getComputedStyle(el);
+      return { selector, x: rect.x, y: rect.y, width: rect.width, height: rect.height, fontSize: style.fontSize, opacity: style.opacity };
+    }));
+  });
+  for (const viewport of [{ width: 1568, height: 884 }, { width: 1024, height: 768 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    for (const presetId of ["trio", "gallery", "outro"]) {
+      await test.step(`${viewport.width}px / ${presetId}`, async () => {
+        await page.evaluate(presetId => window.flowAgent!.apply({ scene: 1, presetId }), presetId);
+        await expect(current(page)).toHaveClass(new RegExp(`preset-${presetId}`));
+        await expect(current(page)).toHaveCSS("height", `${viewport.height}px`);
+        const before = await layout();
+        expect(before[0].width).toBe(viewport.width);
+        await edit(page);
+        expect(await layout()).toEqual(before);
+        if (presetId === "outro") {
+          const stage = await current(page).locator(".outro-stage").boundingBox();
+          expect(stage).toEqual({ x: 0, y: 0, width: viewport.width, height: viewport.height });
+        }
+        await page.getByRole("button", { name: "收起编辑", exact: true }).click();
+        await expect(page.locator(".flow-editor")).toHaveCount(0);
+        expect(await layout()).toEqual(before);
+      });
+    }
+  }
+});
+
 test("云朵限制高分屏像素，编辑和暂停时停止渲染并可原地恢复", async ({ browser, page: editor }) => {
   await editor.goto("about:blank");
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
