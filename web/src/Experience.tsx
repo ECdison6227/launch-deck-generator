@@ -8,7 +8,7 @@ import TiltedCard from '@/components/vendor/react-bits/TiltedCard'
 import BlurText from '@/components/vendor/react-bits/BlurText'
 import { Card, CardContent } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { scenePreset, type Project, type Scene } from './model'
+import { getSceneInk, scenePreset, type Project, type Scene } from './model'
 import 'swiper/css'
 import 'swiper/css/effect-creative'
 import 'swiper/css/effect-fade'
@@ -49,10 +49,7 @@ function SceneContent({ scene, urls, animate, replay, reduced }: { scene: Scene;
     courier: '"Courier New", Courier, monospace',
   }[scene.font || 'sans']
   const hasMotion = animate && scene.motion && !reduced
-  const ink = scene.textColor || '#30384b'
-  const brightness = [0.2126, 0.7152, 0.0722].reduce((sum, weight, i) => sum + weight * parseInt(ink.slice(1 + i * 2, 3 + i * 2), 16), 0)
-  // 已有浅色主题的深色文字，在谢幕黑场上自动使用浅色；保留可读的自选颜色。
-  const displayInk = scene.composition === 'outro' && brightness < 128 ? '#f4f6fa' : ink
+  const displayInk = getSceneInk(scene)
   const effect = scene.photoEffect || 'still'
   const titleEffect = scene.textEffect === 'fade' ? null : scene.textEffect
   const interactivePhotos = scene.motion && !reduced && (effect === 'float' || effect === 'lift')

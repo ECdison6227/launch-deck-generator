@@ -90,6 +90,87 @@ test("编辑浮层开关保持完整画布、背景、字号和内容位置", as
   }
 });
 
+test("收尾禁用背景设置，切回普通页面后恢复并可修改", async ({ page }) => {
+  const original = await page.evaluate(() => window.flowAgent!.inspect()!.background);
+  await page.evaluate(() => window.flowAgent!.apply({ scene: 1, presetId: "outro" }));
+  await edit(page);
+  await page.getByRole("tab", { name: "氛围", exact: true }).click();
+  const background = page.getByRole("group", { name: "背景设置", exact: true });
+  await expect(background).toHaveAttribute("disabled", "");
+  await expect(page.getByText("收尾页使用固定黑场", { exact: false })).toBeVisible();
+  await expect(background.getByRole("button", { name: "云朵", exact: true })).toBeDisabled();
+  await expect(background.getByRole("button", { name: "青屿", exact: true })).toBeDisabled();
+  await expect(background.getByRole("textbox", { name: "背景颜色 1", exact: true })).toBeDisabled();
+  await expect(background.getByLabel("背景流动速度", { exact: true })).toHaveAttribute("data-disabled", "");
+  await expect(background.getByRole("switch", { name: "暂停背景", exact: true })).toBeDisabled();
+  expect(await page.evaluate(() => window.flowAgent!.inspect()!.background)).toEqual(original);
+  await go(page, 2);
+  await expect(background).not.toHaveAttribute("disabled");
+  await expect(background.getByRole("button", { name: "云朵", exact: true })).toBeEnabled();
+  await background.getByRole("switch", { name: "暂停背景", exact: true }).click();
+  await expect(background.getByLabel("背景流动速度", { exact: true })).toHaveAttribute("data-disabled", "");
+  await background.getByRole("switch", { name: "暂停背景", exact: true }).click();
+  await expect(background.getByLabel("背景流动速度", { exact: true })).not.toHaveAttribute("data-disabled");
+  await background.getByRole("button", { name: "青屿", exact: true }).click();
+  await expect.poll(() => page.evaluate(() => window.flowAgent!.inspect()!.background.preset)).toBe("sage");
+  await go(page, 1);
+  await expect(background).toHaveAttribute("disabled", "");
+  const ink = page.getByRole("textbox", { name: "文字颜色 Hex", exact: true });
+  await expect(ink).toHaveValue("#f4f6fa");
+  await expect(page.getByRole("button", { name: "文字配色 #30384b", exact: true })).toBeDisabled();
+  await ink.fill("#30384b");
+  await ink.press("Tab");
+  await expect(ink).toHaveValue("#f4f6fa");
+  await page.getByRole("button", { name: "文字配色 #ffd166", exact: true }).click();
+  await expect(current(page).locator(".scene-heading").first()).toHaveCSS("color", "rgb(255, 209, 102)");
+  await go(page, 2);
+  await background.getByRole("button", { name: "纯色素底", exact: true }).click();
+  await expect(background.getByRole("textbox", { name: "背景颜色 1", exact: true })).toBeEnabled();
+  for (const i of [2, 3, 4]) await expect(background.getByRole("textbox", { name: `背景颜色 ${i}`, exact: true })).toBeDisabled();
+  await background.getByRole("button", { name: "云朵 · 层次", exact: true }).click();
+  await expect(background.getByRole("textbox", { name: "背景颜色 3", exact: true })).toBeDisabled();
+  for (const i of [1, 2, 4]) await expect(background.getByRole("textbox", { name: `背景颜色 ${i}`, exact: true })).toBeEnabled();
+});
+
+test("动效与脚注按版式能力禁用，开启灵动和选择效果后恢复", async ({ page }) => {
+  await edit(page);
+  await page.getByRole("tab", { name: "灵动", exact: true }).click();
+  const motion = page.getByRole("switch", { name: "这一屏的灵动效果", exact: true });
+  const text = page.getByRole("combobox", { name: "文字出场", exact: true });
+  const photo = page.getByRole("combobox", { name: "图片效果", exact: true });
+  const replay = page.getByRole("button", { name: "重新感受这一屏", exact: true });
+  await motion.click();
+  await expect(text).toBeDisabled();
+  await expect(photo).toBeDisabled();
+  await expect(replay).toBeDisabled();
+  await motion.click();
+  await expect(text).toBeEnabled();
+  await expect(photo).toBeEnabled();
+  await expect(replay).toBeEnabled();
+  await page.evaluate(() => window.flowAgent!.apply({ scene: 1, presetId: "chart-full" }));
+  await expect(text).toBeDisabled();
+  await expect(replay).toBeEnabled();
+  await page.evaluate(() => window.flowAgent!.apply({ scene: 1, presetId: "image", photoEffect: "still" }));
+  await expect(text).toBeDisabled();
+  await expect(photo).toBeEnabled();
+  await expect(replay).toBeDisabled();
+  await photo.click();
+  await page.getByRole("option", { name: "轻盈入场", exact: true }).click();
+  await expect(replay).toBeEnabled();
+  await expect(page.locator(".flow-editor")).toBeVisible();
+  await page.getByRole("tab", { name: "内容", exact: true }).click();
+  await expect(page.getByRole("textbox", { name: "脚注", exact: true })).toBeDisabled();
+  await page.evaluate(() => window.flowAgent!.apply({ scene: 4, presetId: "film" }));
+  await go(page, 4);
+  await expect(page.getByRole("textbox", { name: "脚注", exact: true })).toBeDisabled();
+  await page.getByRole("tab", { name: "氛围", exact: true }).click();
+  await expect(page.getByRole("group", { name: "背景设置", exact: true })).toHaveAttribute("disabled", "");
+  await page.getByRole("tab", { name: "灵动", exact: true }).click();
+  await expect(motion).toBeDisabled();
+  await expect(text).toBeDisabled();
+  await expect(replay).toBeDisabled();
+});
+
 test("云朵限制高分屏像素，编辑和暂停时停止渲染并可原地恢复", async ({ browser, page: editor }) => {
   await editor.goto("about:blank");
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });

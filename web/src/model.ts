@@ -14,6 +14,12 @@ export interface Scene {
   footnote?: string; videoId?: string; posterId?: string; table?: string[][]; chart?: SceneChart; muted: boolean; loop: boolean
   motion: boolean; textEffect: 'fade' | 'blur' | 'focus' | 'drift'; material: 'glass' | 'paper'; fit: 'cover' | 'contain'; align: 'left' | 'center'
 }
+export function getSceneInk(scene: Pick<Scene, 'composition' | 'textColor'>) {
+  const ink = scene.textColor || '#30384b'
+  if (scene.composition !== 'outro') return ink
+  const brightness = [0.2126, 0.7152, 0.0722].reduce((sum, weight, i) => sum + weight * parseInt(ink.slice(1 + i * 2, 3 + i * 2), 16), 0)
+  return brightness < 128 ? '#f4f6fa' : ink
+}
 export type SlideTransition = 'creative' | 'fade' | 'cards'
 export interface Project {
   id: string; schemaVersion: 2; name: string; scenes: Scene[]; selectedId: string; updatedAt: number
