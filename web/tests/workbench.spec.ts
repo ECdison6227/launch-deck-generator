@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect } from './fixtures'
+import type { Page } from '@playwright/test'
 import { readFile, mkdir, writeFile, mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -37,6 +38,7 @@ const settle = async (page: Page) => {
 };
 const errors = new WeakMap<Page, string[]>();
 test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(window, 'showSaveFilePicker', { value: undefined, configurable: true }))
   const list: string[] = [];
   errors.set(page, list);
   page.on("pageerror", (error) => list.push(error.message));
@@ -91,7 +93,7 @@ test("编辑浮层开关保持完整画布、背景、字号和内容位置", as
 });
 
 test("收尾禁用背景设置，切回普通页面后恢复并可修改", async ({ page }) => {
-  const original = await page.evaluate(() => window.flowAgent!.inspect()!.background);
+  const original = await page.evaluate(() => window.flowAgent?.inspect()?.background);
   await page.evaluate(() => window.flowAgent!.apply({ scene: 1, presetId: "outro" }));
   await edit(page);
   await page.getByRole("tab", { name: "氛围", exact: true }).click();
@@ -103,7 +105,7 @@ test("收尾禁用背景设置，切回普通页面后恢复并可修改", async
   await expect(background.getByRole("textbox", { name: "背景颜色 1", exact: true })).toBeDisabled();
   await expect(background.getByLabel("背景流动速度", { exact: true })).toHaveAttribute("data-disabled", "");
   await expect(background.getByRole("switch", { name: "暂停背景", exact: true })).toBeDisabled();
-  expect(await page.evaluate(() => window.flowAgent!.inspect()!.background)).toEqual(original);
+  expect(await page.evaluate(() => window.flowAgent?.inspect()?.background)).toEqual(original);
   await go(page, 2);
   await expect(background).not.toHaveAttribute("disabled");
   await expect(background.getByRole("button", { name: "云朵", exact: true })).toBeEnabled();
@@ -112,7 +114,7 @@ test("收尾禁用背景设置，切回普通页面后恢复并可修改", async
   await background.getByRole("switch", { name: "暂停背景", exact: true }).click();
   await expect(background.getByLabel("背景流动速度", { exact: true })).not.toHaveAttribute("data-disabled");
   await background.getByRole("button", { name: "青屿", exact: true }).click();
-  await expect.poll(() => page.evaluate(() => window.flowAgent!.inspect()!.background.preset)).toBe("sage");
+  await expect.poll(() => page.evaluate(() => window.flowAgent?.inspect()?.background.preset)).toBe("sage");
   await go(page, 1);
   await expect(background).toHaveAttribute("disabled", "");
   const ink = page.getByRole("textbox", { name: "文字颜色 Hex", exact: true });
@@ -224,6 +226,9 @@ test("收尾字幕可读并完全渐黑，编辑预览保留面板，换版式�
   await page.getByRole("button", { name: "重新感受这一屏", exact: true }).click();
   await expect(current(page).locator(".outro-veil")).toHaveCSS("opacity", "1");
   await expect(page.locator(".flow-editor")).toBeVisible();
+  await go(page, 2);
+  await go(page, 1);
+  await expect(current(page).locator(".outro-veil")).toHaveCount(0);
   await page.getByRole("tab", { name: "内容", exact: true }).click();
   await page.getByRole("textbox", { name: "主标题 1", exact: true }).fill("编辑后继续可见");
   await expect(current(page).locator(".outro-veil")).toHaveCount(0);
@@ -389,7 +394,7 @@ test("场景新建复制、排序、确认删除和持久化", async ({ page }) 
   await saved(page);
   await page.reload();
   await expect
-    .poll(() => page.evaluate(() => window.flowAgent!.inspect()!.scenes[2].name))
+    .poll(() => page.evaluate(() => window.flowAgent?.inspect()?.scenes[2].name))
     .toBe("新复制的片刻");
   await edit(page);
   await page.getByRole("button", { name: "删除这一屏", exact: true }).click();
@@ -725,6 +730,8 @@ test("ZIP 含运行时和媒体，独立来源离线运行、播放视频并可�
     await expect
       .poll(() => video.evaluate((v: HTMLVideoElement) => v.currentTime))
       .toBeGreaterThan(0);
+    await video.evaluate((v: HTMLVideoElement) => { v.pause(); v.currentTime = 3 });
+    await expect.poll(() => video.evaluate((v: HTMLVideoElement) => Math.abs(v.currentTime - 3) < 0.2 && !v.seeking && v.readyState >= 2)).toBe(true);
     const handle = await video.elementHandle();
     await go(local, 3);
     expect(await handle!.evaluate((v: HTMLVideoElement) => v.paused)).toBe(
@@ -733,8 +740,7 @@ test("ZIP 含运行时和媒体，独立来源离线运行、播放视频并可�
     expect(failed).toEqual([]);
     expect(requests.some((url) => url.includes("/assets/"))).toBe(true);
   } finally {
-    server?.kill();
-    await isolated.close();
+    try { await isolated.close() } finally { server?.kill() }
   }
   await page.goto("/");
   await edit(page);
@@ -909,7 +915,7 @@ test("v0.3 深色背景、脚注、折线图、结尾收束与切屏转场", asy
   await page.evaluate(() => window.flowAgent!.setBackground({ preset: "ink" }));
   await expect
     .poll(() =>
-      page.evaluate(() => window.flowAgent!.inspect()!.background.kind),
+      page.evaluate(() => window.flowAgent?.inspect()?.background.kind),
     )
     .toBe("mesh");
   await page.evaluate(() =>
@@ -993,17 +999,17 @@ test("v0.3 深色背景、脚注、折线图、结尾收束与切屏转场", asy
   await saved(page);
   await page.reload();
   await expect
-    .poll(() => page.evaluate(() => window.flowAgent!.inspect()!.transition))
+    .poll(() => page.evaluate(() => window.flowAgent?.inspect()?.transition))
     .toBe("cards");
   await expect
     .poll(() =>
-      page.evaluate(() => window.flowAgent!.inspect()!.background.preset),
+      page.evaluate(() => window.flowAgent?.inspect()?.background.preset),
     )
     .toBe("carbon");
   await expect
     .poll(() =>
       page.evaluate(
-        () => !!window.flowAgent!.inspect()!.scenes.find((s) => s.chart),
+        () => !!window.flowAgent?.inspect()?.scenes.find((s) => s.chart),
       ),
     )
     .toBe(true);
@@ -1132,8 +1138,7 @@ test("v0.3 便携运行包在深色背景与折线图下独立运行", async ({
       "由 agent.mjs 写入",
     );
   } finally {
-    server?.kill();
-    await isolated.close();
+    try { await isolated.close() } finally { server?.kill() }
   }
 });
 
@@ -1150,7 +1155,7 @@ test("v0.3.1 云朵背景、字体选项、色板联动文字色与无品牌标�
   });
   await expect
     .poll(() =>
-      page.evaluate(() => window.flowAgent!.inspect()!.scenes[0].textColor),
+      page.evaluate(() => window.flowAgent?.inspect()?.scenes[0].textColor),
     )
     .toBe("#2f3d55");
   await page.screenshot({ path: "evidence/v3/clouds-cumulus.png" });
@@ -1162,7 +1167,7 @@ test("v0.3.1 云朵背景、字体选项、色板联动文字色与无品牌标�
   await expect(page.locator(".vanta-backdrop canvas").first()).toBeAttached();
   await expect
     .poll(() =>
-      page.evaluate(() => window.flowAgent!.inspect()!.scenes[0].textColor),
+      page.evaluate(() => window.flowAgent?.inspect()?.scenes[0].textColor),
     )
     .toBe("#f5e9da");
   await page.evaluate(() =>
@@ -1193,7 +1198,7 @@ test("v0.3.1 云朵背景、字体选项、色板联动文字色与无品牌标�
   await page.reload();
   await expect
     .poll(() =>
-      page.evaluate(() => window.flowAgent!.inspect()!.background.preset),
+      page.evaluate(() => window.flowAgent?.inspect()?.background.preset),
     )
     .toBe("dawn");
   await expect(current(page).locator(".vanta-backdrop")).toHaveCount(0);

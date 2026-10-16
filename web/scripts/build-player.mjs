@@ -1,4 +1,3 @@
-import { zipSync } from 'fflate'
 import { cp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { resolve, relative } from 'node:path'
 const root = resolve(import.meta.dirname, '..')
@@ -17,8 +16,6 @@ async function walk(dir) { for (const item of await readdir(dir, { withFileTypes
 await walk(target)
 await writeFile(resolve(target, 'manifest.json'), JSON.stringify({ version: '0.2.0', builtAt: new Date().toISOString(), files }, null, 2))
 try { await readFile(resolve(root, 'dist/index.html')); await rm(resolve(root, 'dist/player'), { recursive: true, force: true }); await cp(target, resolve(root, 'dist/player'), { recursive: true }) } catch {}
-const runtimeFiles = Object.fromEntries(await Promise.all(files.map(async file => [file, new Uint8Array(await readFile(resolve(target, file)))])))
-const runtimeZip = zipSync(runtimeFiles, { level: 6 })
-await writeFile(resolve(root, 'public/player-runtime.zip'), runtimeZip)
-try { await readFile(resolve(root, 'dist/index.html')); await writeFile(resolve(root, 'dist/player-runtime.zip'), runtimeZip) } catch {}
+await rm(resolve(root, 'public/player-runtime.zip'), { force: true })
+await rm(resolve(root, 'dist/player-runtime.zip'), { force: true })
 console.log(`Portable player: ${files.length} local files → public/player`)

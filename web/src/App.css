@@ -42,3 +42,9 @@ html, body, #root { height: 100%; width: 100%; margin: 0; }button { cursor: poin
 .background-settings:disabled { opacity: .6; }
 
 .ink-swatch:disabled { opacity: .35; cursor: not-allowed; }
+
+@media (prefers-reduced-transparency: reduce) {
+  .scene-dock, .flow-actions, .flow-editor { background: #f8fafff5; backdrop-filter: none; }
+}
+html[data-perf=low] .scene-dock, html[data-perf=low] .flow-actions, html[data-perf=low] .flow-editor { background: #f8fafff5; backdrop-filter: none; }
+.editor-history { display: flex; gap: 6px; margin: -8px 0 12px; }

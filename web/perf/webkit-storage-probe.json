@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-16",
+  "browser": "Playwright WebKit 2370",
+  "origin": "http://127.0.0.1:5373/",
+  "method": "独立数据库通过原生 IndexedDB 写入；测试新建 Blob、fetch Blob 和 arrayBuffer 重建 Blob。",
+  "privateContext": {
+    "string": "ok",
+    "Uint8Array": "ok",
+    "constructedBlob": "UnknownError: Error preparing Blob/File data to be stored in object store",
+    "fetchedBlob": "same error",
+    "reconstructedBlob": "same error"
+  },
+  "persistentContext": {
+    "string": "ok",
+    "Uint8Array": "ok",
+    "constructedBlob": "ok",
+    "fetchedBlob": "ok",
+    "reconstructedBlob": "ok"
+  },
+  "scope": "本机引擎最小复现，不等同所有 Safari 版本。",
+  "relatedUpstreamIssue": "https://bugs.webkit.org/show_bug.cgi?id=188438"
+}

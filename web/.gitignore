@@ -24,7 +24,7 @@ dist-ssr
 *.sw?
 
 # Browser test output
-test-results/
+test-results*/
 evidence/playwright-report/
 evidence/playwright-*-report/
 

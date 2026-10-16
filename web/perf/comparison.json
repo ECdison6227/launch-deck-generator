@@ -1,0 +1,112 @@
+{
+  "before": "baseline.json",
+  "after": "after-phase-1-2.json",
+  "scenarios": {
+    "navigation": {
+      "elapsedMs": {
+        "before": 31204,
+        "after": 32084
+      },
+      "projectWrites": {
+        "before": 19,
+        "after": 9
+      },
+      "heapPeakBytes": {
+        "before": 12715900,
+        "after": 10893700
+      },
+      "longestTaskMs": {
+        "before": 282,
+        "after": 214
+      },
+      "longestFrameMs": {
+        "before": 0,
+        "after": 0
+      },
+      "longTasks": {
+        "before": 209,
+        "after": 202
+      },
+      "backingStoragePeakBytes": {
+        "after": 2819764,
+        "note": "基线未采集该字段，不用于前后内存降幅对比"
+      }
+    },
+    "typing": {
+      "elapsedMs": {
+        "before": 5094,
+        "after": 5872
+      },
+      "projectWrites": {
+        "before": 202,
+        "after": 1
+      },
+      "heapPeakBytes": {
+        "before": 24486196,
+        "after": 16915888
+      },
+      "longestTaskMs": {
+        "before": 0,
+        "after": 0
+      },
+      "longestFrameMs": {
+        "before": 69.19999998807907,
+        "after": 0
+      },
+      "longTasks": {
+        "before": 0,
+        "after": 0
+      },
+      "backingStoragePeakBytes": {
+        "after": 1987600,
+        "note": "基线未采集该字段，不用于前后内存降幅对比"
+      }
+    },
+    "exporting": {
+      "elapsedMs": {
+        "before": 1769,
+        "after": 1368
+      },
+      "projectWrites": {
+        "before": 0,
+        "after": 0
+      },
+      "heapPeakBytes": {
+        "before": 15646828,
+        "after": 16726348
+      },
+      "longestTaskMs": {
+        "before": 667,
+        "after": 0
+      },
+      "longestFrameMs": {
+        "before": 667.5,
+        "after": 0
+      },
+      "longTasks": {
+        "before": 2,
+        "after": 0
+      },
+      "backingStoragePeakBytes": {
+        "after": 231081300,
+        "note": "基线未采集该字段，不用于前后内存降幅对比"
+      }
+    }
+  },
+  "editorEntry": {
+    "before": {
+      "path": "dist/assets/index-UJPOu625.js",
+      "bytes": 905651,
+      "gzipBytes": 297512
+    },
+    "after": {
+      "path": "dist/assets/index-C-zRTzeT.js",
+      "bytes": 840300,
+      "gzipBytes": 263068
+    }
+  },
+  "notes": [
+    "耗时包含自动化操作、固定等待和等待保存，不能当作输入延迟。",
+    "GPU / 软件 WebGL 与温度影响显著，单次长帧结果不等于实际路演帧率。"
+  ]
+}

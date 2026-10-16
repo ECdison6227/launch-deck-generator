@@ -21,9 +21,15 @@ function Player() {
         const manifest = await response.json() as PortableManifest
         if (manifest.format !== 'flow-web' || manifest.version !== 2) throw new Error('运行包格式不受支持')
         const loaded = normalizeProject(manifest.project)
-        const urls = Object.fromEntries(manifest.media.map(m => {
+        const urls = Object.fromEntries(manifest.media.flatMap(m => {
           if (!m.path.startsWith('media/') || m.path.includes('..')) throw new Error('媒体路径无效')
-          return [m.id, new URL(m.path, location.href).href]
+          const entries = [[m.id, new URL(m.path, location.href).href]]
+          if (m.variants?.medium) {
+            const path = m.variants.medium.path
+            if (!path.startsWith('media/') || path.includes('..')) throw new Error('媒体路径无效')
+            entries.push([`${m.id}:medium`, new URL(path, location.href).href])
+          }
+          return entries
         }))
         setUrls(urls); setProject(loaded); document.title = loaded.name
       } catch (error) { setError(String(error)) }

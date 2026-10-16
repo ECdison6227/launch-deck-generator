@@ -12,7 +12,7 @@
     "repository": "https://github.com/DavidHDev/react-bits",
     "commit": "43591e8b3fa327d45633b4e8239ff6742ef706ef",
     "license": "MIT + Commons Clause",
-    "localModifications": "无；TiltedCard TSX/CSS、BlurText TSX 与固定 commit SHA-256 一致。",
+    "localModifications": "TiltedCard.tsx：将无依赖的动画唤醒 effect 改为仅在交互、浮动、入场设置变化时触发，避免文本编辑唤醒静止图片；其余组件及 CSS 保持原样，保留上游许可。",
     "components": [
       "TiltedCard",
       "BlurText"
@@ -38,8 +38,50 @@
     "src/components/ui/input.tsx": "0c9457181f6ddc80969bcf854e92c362903a55b6e889fbef3fd85343ecc4af5b",
     "src/components/vendor/react-bits/LICENSE.md": "f4c33af6739191537738662d223b68d77bc226f4b57ea883e16481d8cc5c73c9",
     "src/components/vendor/react-bits/BlurText.tsx": "ff976389990b9f25376ad491dabd66262913cc574151d54f205fcd4ca05d7ed6",
-    "src/components/vendor/react-bits/TiltedCard.tsx": "ca6b76a91a87659987c872b8a000e8776bc885d70aeeded46da9b9645554e07e",
+    "src/components/vendor/react-bits/TiltedCard.tsx": "74000aecf8b287320e30946dbf5d323cdd22bf389f2034c1cb51b6558c01e87b",
     "src/components/vendor/react-bits/TiltedCard.css": "6214acb092fd97b67af30712ae7d53590bd65ee695c79867410dbed68a042904"
   },
-  "version": "0.2.0"
+  "version": "0.2.0",
+  "optimization": {
+    "packages": [
+      {
+        "name": "@paper-design/shaders",
+        "version": "0.0.81",
+        "license": "Apache-2.0",
+        "usage": "背景原生挂载，替代 React 包装"
+      },
+      {
+        "name": "client-zip",
+        "version": "2.5.1",
+        "license": "MIT",
+        "usage": "媒体按需读取、流式 ZIP 导出"
+      },
+      {
+        "name": "zustand",
+        "version": "5.0.15",
+        "license": "MIT",
+        "usage": "项目状态与编辑 UI 状态隔离"
+      },
+      {
+        "name": "zundo",
+        "version": "2.3.0",
+        "license": "MIT",
+        "usage": "100 步撤销/重做、连续编辑合并"
+      },
+      {
+        "name": "vite-bundle-analyzer",
+        "version": "1.3.9",
+        "license": "MIT",
+        "usage": "仅开发：静态包分析"
+      },
+      {
+        "name": "react-scan",
+        "version": "0.5.7",
+        "license": "MIT",
+        "usage": "仅开发：?scan 按需加载"
+      }
+    ],
+    "imagePipeline": "应用自有接线：Worker + createImageBitmap + OffscreenCanvas；GIF/SVG 和识别到的动画图片保留。",
+    "background": "Paper ShaderMount 原生 API、原有 mesh / grain GLSL 与参数；应用统一限制 30fps。"
+  }
 }

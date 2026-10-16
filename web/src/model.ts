@@ -26,7 +26,7 @@ export interface Project {
   background: { kind: BackgroundKind; colors: string[]; speed: number; paused: boolean; preset: string }
   transition: SlideTransition
 }
-export interface Media { id: string; name: string; blob: Blob; type: string }
+export interface Media { id: string; name: string; blob: Blob; type: string; width?: number; height?: number; processed?: boolean }
 export const limits = { scenes: 100, headings: 2, texts: 2, photos: 6, chartPoints: 12, chartSeries: 3 } as const
 export type BackgroundKind = 'mesh' | 'grain' | 'clouds' | 'clouds2' | 'solid'
 export const backgroundKinds: { id: BackgroundKind; label: string }[] = [

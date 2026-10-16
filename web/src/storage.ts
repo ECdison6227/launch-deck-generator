@@ -1,12 +1,52 @@
 import Dexie, { type EntityTable } from 'dexie'
 import { normalizeProject, normalizeScene, referencedMedia, seedProject, type Project, type Media } from './model'
-export const db = new Dexie('stage-workbench') as Dexie & { projects: EntityTable<Project, 'id'>; media: EntityTable<Media, 'id'> }
+import { processMedia, type ImageVariant } from './media/process-image'
+export const db = new Dexie('stage-workbench') as Dexie & { projects: EntityTable<Project, 'id'>; media: EntityTable<Media, 'id'>; variants: EntityTable<ImageVariant, 'id'> }
 db.version(1).stores({ projects: 'id', media: 'id' })
+db.version(2).stores({ projects: 'id', media: 'id', variants: 'id, mediaId' })
+
+export async function prepareMedia(media: Media[]) {
+  const processed: Media[] = []; const variants: ImageVariant[] = []
+  // 逐张处理，避免六张手机原图同时解码占用数百 MB。
+  for (const asset of media) { const result = await processMedia(asset); processed.push(result.media); variants.push(...result.variants) }
+  return { media: processed, variants }
+}
+
+export async function putMedia(media: Media[]) {
+  const result = await prepareMedia(media)
+  await db.transaction('rw', db.media, db.variants, async () => { await db.media.bulkPut(result.media); await db.variants.bulkPut(result.variants) })
+  return result
+}
+
+/** 空闲时逐张迁移；编码成功且旧记录仍存在时才原子替换，不覆盖导入或其他写入。 */
+export async function migrateImages(onReady: (result: Awaited<ReturnType<typeof prepareMedia>>) => void, cancelled: () => boolean) {
+  const ids = await db.media.toCollection().primaryKeys()
+  for (const id of ids) {
+    await new Promise<void>(resolve => {
+      if ('requestIdleCallback' in window) window.requestIdleCallback(() => resolve(), { timeout: 2000 })
+      else setTimeout(resolve, 100)
+    })
+    if (cancelled()) return
+    const old = await db.media.get(id)
+    if (!old || old.processed || !old.type.startsWith('image/')) continue
+    try {
+      const result = await prepareMedia([old])
+      if (cancelled()) return
+      let written = false
+      await db.transaction('rw', db.media, db.variants, async () => {
+        const current = await db.media.get(id)
+        if (!current || current.processed || current.type !== old.type || current.blob.size !== old.blob.size) return
+        await db.media.put(result.media[0]); await db.variants.bulkPut(result.variants); written = true
+      })
+      if (written && !cancelled()) onReady(result)
+    } catch { /* 旧图片处理失败时继续使用原记录，不影响打开项目。 */ }
+  }
+}
 
 /** 删除未被当前项目或任何备份项目引用的媒体。被替换的图片、视频通过此函数回收。 */
-export async function pruneUnusedMedia() {
+export async function pruneUnusedMedia(keepIds: string[] = []) {
   const projects = await db.projects.toArray()
-  const referenced = new Set<string>()
+  const referenced = new Set<string>(keepIds)
   for (const p of projects) {
     if (p.schemaVersion === 2) referencedMedia(p).forEach(id => referenced.add(id))
     else (p as unknown as { slides?: { imageId?: string; videoId?: string; posterId?: string; cards?: { imageId?: string }[] }[] }).slides?.forEach(s => {
@@ -16,7 +56,7 @@ export async function pruneUnusedMedia() {
   // 只读取主键，避免每次保存都把全部图片和视频 Blob 再载入内存。
   const ids = await db.media.toCollection().primaryKeys()
   const orphan = ids.filter(id => !referenced.has(id))
-  if (orphan.length) await db.media.bulkDelete(orphan)
+  if (orphan.length) await db.transaction('rw', db.media, db.variants, async () => { await db.media.bulkDelete(orphan); await db.variants.where('mediaId').anyOf(orphan).delete() })
   return orphan.length
 }
 export async function loadProject() {

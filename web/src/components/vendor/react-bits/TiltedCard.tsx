@@ -196,7 +196,7 @@ const TiltedCard = ({
 
   useEffect(() => {
     wakeRef.current?.();
-  });
+  }, [floating, intro, introDelay, rotateAmplitude, scaleOnHover, smoothness, glare, shadow, parallax, axis, reverse, trackWindow, gyroscope, isFlipped, showTooltip, captionText, flipOnClick, backContent, onClick]);
 
   useEffect(() => {
     const figure = figureRef.current;

@@ -76,3 +76,16 @@ npm run test:e2e -- --repeat-each=3
 浏览器中的 `window.flowAgent` 提供 `inspect()`、`listPresets()`、`apply()`、`addScene()`、`setBackground()`。Agent 可以直接交出内容：`addScene` 接受每屏的大字、小字，以及 base64 data URL 形式的图片和视频，一次调用就能从零搭出一屏，写入 IndexedDB 后刷新仍在。
 
 ZIP 中包含 `agent.mjs` 和配置样本，另一台电脑可运行 `node agent.mjs apply agent-example.json` 修改已有屏，或把本地图片/视频路径写进 JSON 后运行 `node agent.mjs add new-scene.json` 新建一屏——素材会被复制进运行包并登记媒体清单。两者都受同一套固定预设、数量、颜色与效果规则约束。详见 [Agent 调用说明](../docs/AGENT_API.md)。
+
+## 性能诊断与本轮优化
+
+- `npm run analyze`：生成 `dist/bundle-report.html` 静态体积报告。
+- 开发地址加 `?scan`：按需开启 React 重渲染诊断；生产环境不加载。
+- `PERF_REPORT=after-phase-1-2 npm run test:perf`：单独运行性能压力脚本并生成 JSON。不要与 E2E 或其他性能脚本并发运行。
+- 图片上传会保存 3840 / 1920 / 400 三档，大屏、多图和缩略图各取合适尺寸；GIF、SVG 和识别到的动画图片保留。
+- 编辑面板新增撤销/重做；文本框内保留浏览器原生撤销，其他位置支持 Ctrl/⌘+Z 和 Ctrl/⌘+Shift+Z。
+- 打包时支持文件保存接口的浏览器直接写盘；其余浏览器仍下载 ZIP。未使用的阿里妈妈字体不带进运行包。
+
+实施范围、验证口径与剩余任务见 [优化实施记录](../docs/OPTIMIZATION_PROGRESS.md)。
+
+Safari / WebKit 若在无痕会话出现“Error preparing Blob/File data”存储错误，请使用普通窗口打开编辑器。独立导出的播放器不使用 IndexedDB；引擎复现与验证范围见上述实施记录。

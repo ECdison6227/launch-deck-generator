@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-16",
+  "checks": [
+    {
+      "command": "npm run typecheck",
+      "result": "passed"
+    },
+    {
+      "command": "npm run lint",
+      "result": "passed",
+      "notes": "保留已有组件、refs 与预览状态同步提示；无 lint error。"
+    },
+    {
+      "command": "npm run test:e2e",
+      "result": "passed",
+      "passed": 26,
+      "skipped": 1,
+      "notes": "性能脚本按设计单独运行；命令也运行便携服务器协议单测。"
+    },
+    {
+      "command": "npx playwright test --repeat-each=3 --grep '背景限帧|收尾字幕|删图后|连续输入'",
+      "result": "passed",
+      "passed": 15,
+      "skipped": 3
+    },
+    {
+      "command": "npx playwright test --browser=webkit --grep '大图生成|ZIP 含运行时|保存失败|连续输入'",
+      "result": "passed",
+      "passed": 4,
+      "notes": "编辑器独立普通配置目录；独立播放器仍为无痕上下文。"
+    },
+    {
+      "command": "PERF_REPORT=after-phase-1-2 npm run test:perf",
+      "result": "passed",
+      "passed": 1
+    },
+    {
+      "command": "npx playwright test tests/optimization.spec.ts",
+      "result": "passed",
+      "passed": 7,
+      "notes": "最终 fixture 调整和依赖数组简化后补跑。"
+    }
+  ],
+  "limits": [
+    "WebKit 无痕编辑器 Blob 持久化问题仍存在，普通窗口正常；详见 webkit-storage-probe.json。",
+    "尚未验证真实 4K / 投影机 / iPhone 的帧率或完整进程内存。",
+    "切屏长任务和首包目标尚未完全达成，未宣称全方案完成。"
+  ]
+}
