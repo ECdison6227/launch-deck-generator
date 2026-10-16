@@ -12,5 +12,13 @@
 *.log
 logs/
 
+# 本地环境配置与私钥
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+
 # 子项目自带 web/.gitignore
 node_modules
