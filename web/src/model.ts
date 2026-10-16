@@ -81,7 +81,8 @@ export function seedProject(): Project {
   const second = { ...newScene('gallery'), name: '六个瞬间', headings: ['从山海之间，收集灵感。'], texts: ['海浪、林间与晨雾。把看见的美好，带进下一次表达。'], photos: photos('ocean', 'woodland', 'alpine', 'botanical', 'dunes', 'hills') }
   const third = { ...newScene('duet'), name: '留一点呼吸', headings: ['少一点束缚，', '多一点表达。'], texts: ['一段文字，一张照片。', '把注意力留给真正重要的内容。'], photos: photos('ocean', 'alpine') }
   const fourth = { ...newScene('cinema'), name: '让故事流动', headings: ['让故事，自己流动。'], texts: ['有些美好，适合用一段影像讲述。'], videoId: 'flower' }
-  return { id: 'current', schemaVersion: 2, name: '一场自然发生的发布', scenes: [first, second, third, fourth], selectedId: first.id, updatedAt: Date.now(), background: { kind: 'mesh', colors: palettes[0].colors, speed: 0.18, paused: false, preset: 'dawn' }, transition: 'fade' }
+  const cumulus = palettes.find(p => p.id === 'cumulus')!
+  return { id: 'current', schemaVersion: 2, name: '一场自然发生的发布', scenes: [first, second, third, fourth], selectedId: first.id, updatedAt: Date.now(), background: { kind: cumulus.kind, colors: cumulus.colors, speed: 0.18, paused: false, preset: 'cumulus' }, transition: 'fade' }
 }
 const strings = (value: unknown, count: number, length: number): string[] => Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string').slice(0, count).map(v => v.slice(0, length)) : []
 const numbers = (value: unknown, count: number): number[] => Array.isArray(value) ? value.map(v => Number(v)).filter(v => Number.isFinite(v)).slice(0, count) : []
