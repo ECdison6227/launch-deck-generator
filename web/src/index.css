@@ -1,0 +1,66 @@
+@import "tailwindcss" source("./");
+@import "tw-animate-css";
+@custom-variant dark (&:is(.dark *));
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+:root {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --radius: .625rem;
+  --background: #fdfdfc;
+  --foreground: #333944;
+  --card: #fff;
+  --card-foreground: #333944;
+  --popover: #fff;
+  --popover-foreground: #333944;
+  --primary: #485365;
+  --primary-foreground: #fff;
+  --secondary: #edf0f4;
+  --secondary-foreground: #404d61;
+  --muted: #f3f3f1;
+  --muted-foreground: #727984;
+  --accent: #f0f1f2;
+  --accent-foreground: #343d4b;
+  --destructive: #be4848;
+  --border: #e7e8e8;
+  --input: #dedfe2;
+  --ring: #a1abba;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  body { @apply bg-background text-foreground; margin: 0; }
+  button, input, textarea { font: inherit; }
+}
+
+@font-face {
+  font-family: 'Alimama ShuHeiTi';
+  src: url('./assets/fonts/AlimamaShuHeiTi-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-15",
+  "stage": "design-only",
+  "rendered": false,
+  "runtimeVerified": false,
+  "constraints": [
+    "全部采用现成组件，只组合、配置和接线",
+    "现成布局与内容槽位已获用户确认，自由画布不在第一版",
+    "shadcn 优先采用 Radix 分支，不混用基础交互体系",
+    "具体版本在集成验证后锁定"
+  ],
+  "components": [
+    {
+      "capability": "编辑区基础控件与面板",
+      "primary": "shadcn/ui Button、Input、Textarea、Select、Tabs、Sidebar、Sheet",
+      "sourceUrl": "https://ui.shadcn.com/docs/components",
+      "reuseMode": "使用官方 registry 组件并配置主题、组合布局与事件",
+      "status": "recommended-unverified",
+      "notes": "不另写同类基础控件"
+    },
+    {
+      "capability": "舞台比例",
+      "primary": "shadcn/ui Aspect Ratio",
+      "sourceUrl": "https://ui.shadcn.com/docs/components/aspect-ratio",
+      "reuseMode": "配置 16:9，容器等比适配可用空间",
+      "status": "recommended-unverified",
+      "notes": "1920×1080 是设计坐标建议，不是编辑器整个界面尺寸"
+    },
+    {
+      "capability": "页面切换与演示生命周期",
+      "primary": "reveal.js + 官方 @revealjs/react 的 Deck / Slide",
+      "sourceUrl": "https://revealjs.com/react/",
+      "reuseMode": "页数据映射、内置转场配置、事件适配",
+      "status": "recommended-unverified",
+      "notes": "不另写翻页引擎"
+    },
+    {
+      "capability": "点击后逐项入场",
+      "primary": "@revealjs/react Fragment",
+      "sourceUrl": "https://revealjs.com/fragments/",
+      "reuseMode": "现成 fade-up 等样式与 index 配置",
+      "status": "recommended-unverified",
+      "notes": "用于按步骤出现，不写成自动错峰播放"
+    },
+    {
+      "capability": "渐变背景",
+      "primary": "@paper-design/shaders-react MeshGradient",
+      "sourceUrl": "https://shaders.paper.design/mesh-gradient",
+      "reuseMode": "颜色、速度、颗粒等 props，保留同一背景实例",
+      "status": "recommended-unverified",
+      "notes": "Apache-2.0；不写 shader；参数过渡能力需实测"
+    },
+    {
+      "capability": "流体背景补充",
+      "primary": "Paper Shaders Warp 或 GrainGradient",
+      "sourceUrl": "https://shaders.paper.design/warp",
+      "reuseMode": "从同库选择一个现成预设，配置组件参数",
+      "status": "alternative-unverified",
+      "notes": "不默认把所有候选都装入首版"
+    },
+    {
+      "capability": "云朵背景",
+      "primary": "Vanta CLOUDS",
+      "sourceUrl": "https://github.com/tengbao/vanta",
+      "reuseMode": "官方构建产物、兼容 Three.js、生命周期和参数适配",
+      "status": "candidate-source-downloaded-runtime-unverified",
+      "notes": "已留档源码与许可；不能确认是用户记忆中的项目；CLOUDS2 另需纹理"
+    },
+    {
+      "capability": "普通图文卡片",
+      "primary": "shadcn/ui Card",
+      "sourceUrl": "https://ui.shadcn.com/docs/components/card",
+      "reuseMode": "组合 Card 内容区，设置填充、描边、圆角等主题参数",
+      "status": "recommended-unverified",
+      "notes": "材质配置不等于重新实现 Hark 的连续圆角算法"
+    },
+    {
+      "capability": "图片卡片指针倾斜",
+      "primary": "React Bits TiltedCard",
+      "sourceUrl": "https://reactbits.dev/components/tilted-card",
+      "reuseMode": "官方 registry 源码与公开参数；保留上游与许可记录",
+      "status": "recommended-unverified",
+      "notes": "不是自动漂浮；React Bits 当前许可为 MIT + Commons Clause"
+    },
+    {
+      "capability": "图片堆叠切换",
+      "primary": "React Bits Stack",
+      "sourceUrl": "https://reactbits.dev/components/stack",
+      "reuseMode": "直接传入图片卡与官方支持的交互参数",
+      "status": "alternative-unverified",
+      "notes": "接近 Hark 的堆叠表达；不承诺相同的 mesh 翻牌"
+    },
+    {
+      "capability": "卡片自动轮换",
+      "primary": "React Bits CardSwap",
+      "sourceUrl": "https://reactbits.dev/components/card-swap",
+      "reuseMode": "使用官方轮换行为与配置",
+      "status": "alternative-unverified",
+      "notes": "常规讲解页默认不自动轮换"
+    },
+    {
+      "capability": "表格与单元格编辑",
+      "primary": "shadcn/ui Table + Input",
+      "sourceUrl": "https://ui.shadcn.com/docs/components/table",
+      "reuseMode": "表头、行、单元格组合及二维数据绑定",
+      "status": "recommended-unverified",
+      "notes": "不引入电子表格计算、筛选与分页引擎"
+    },
+    {
+      "capability": "视频播放",
+      "primary": "浏览器原生 video + reveal.js 媒体生命周期",
+      "sourceUrl": "https://revealjs.com/media/",
+      "reuseMode": "本地资源、封面和标准媒体属性绑定，离页暂停",
+      "status": "recommended-unverified",
+      "notes": "不开发播放器控件；有声自动播放限制需处理"
+    },
+    {
+      "capability": "本地页面与素材保存",
+      "primary": "Dexie / IndexedDB",
+      "sourceUrl": "https://dexie.org/docs",
+      "reuseMode": "数据表与 Blob 持久化接线",
+      "status": "recommended-unverified",
+      "notes": "页面配置与素材保持可关联；刷新恢复和失败路径需实测"
+    },
+    {
+      "capability": "项目 ZIP 打包",
+      "primary": "fflate",
+      "sourceUrl": "https://github.com/101arrowz/fflate",
+      "reuseMode": "成熟 ZIP 能力组合内容 JSON 与素材文件",
+      "status": "extension-not-confirmed",
+      "notes": "不属于首个可用版门槛；播放包仍需验证打开方式"
+    },
+    {
+      "capability": "HALOCARD",
+      "primary": null,
+      "sourceUrl": null,
+      "reuseMode": "待用户提供唯一仓库后评估",
+      "status": "unidentified-not-selected",
+      "notes": "不凭同名搜索结果确定依赖，不阻塞现成卡片替代方案"
+    }
+  ]
+}

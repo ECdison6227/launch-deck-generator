@@ -1,0 +1,83 @@
+{
+  "repository": "https://github.com/tengbao/vanta",
+  "commit": "f8b351906688b56f0fc744e53bde81fc3c56f150",
+  "retrieved_date": "2026-10-15",
+  "purpose": "Research snapshot only; not integrated into the application.",
+  "files": [
+    {
+      "path": "README.md",
+      "url": "https://raw.githubusercontent.com/tengbao/vanta/f8b351906688b56f0fc744e53bde81fc3c56f150/README.md",
+      "bytes": 6615,
+      "sha256": "483f2df9b99f4bd561aa16c9ddc829b2d7c422c9b659cdabd9494172bd840917"
+    },
+    {
+      "path": "LICENSE.md",
+      "url": "https://raw.githubusercontent.com/tengbao/vanta/f8b351906688b56f0fc744e53bde81fc3c56f150/LICENSE.md",
+      "bytes": 1048,
+      "sha256": "65df69dccc2a06fcf307e81da62c0f64b4abc03fe64a23944427a69642edadcb"
+    },
+    {
+      "path": "package.json",
+      "url": "https://raw.githubusercontent.com/tengbao/vanta/f8b351906688b56f0fc744e53bde81fc3c56f150/package.json",
+      "bytes": 860,
+      "sha256": "aa8e90ecb53efcf2d445f57d5529b30861d83de683d083d974b0283487eb2a52"
+    },
+    {
+      "path": "src/vanta.clouds.js",
+      "url": "https://raw.githubusercontent.com/tengbao/vanta/f8b351906688b56f0fc744e53bde81fc3c56f150/src/vanta.clouds.js",
+      "bytes": 5191,
+      "sha256": "e6a8edb2da9b0563f13d6420a2f01c0e54f0aebc354e0eaebc63a34662498848"
+    },
+    {
+      "path": "src/vanta.clouds2.js",
+      "url": "https://raw.githubusercontent.com/tengbao/vanta/f8b351906688b56f0fc744e53bde81fc3c56f150/src/vanta.clouds2.js",
+      "bytes": 1478,
+      "sha256": "98f2b7049e2629c5c81dec8644dfc3100bc8831bce781b0d303e90418c6f6a10"
+    },
+    {
+      "path": "src/vanta.fog.js",
+      "url": "https://raw.githubusercontent.com/tengbao/vanta/f8b351906688b56f0fc744e53bde81fc3c56f150/src/vanta.fog.js",
+      "bytes": 2614,
+      "sha256": "635479889bb2296b8a691d9d197e224dde1c95f88e05174490779364cf7e352b"
+    },
+    {
+      "path": "src/_base.js",
+      "url": "https://raw.githubusercontent.com/tengbao/vanta/f8b351906688b56f0fc744e53bde81fc3c56f150/src/_base.js",
+      "bytes": 12646,
+      "sha256": "5be36a2f7bf66f4cf775be24bad7c4f4c6d8c9c43410a837a51b131045762a8b"
+    },
+    {
+      "path": "src/_shaderBase.js",
+      "url": "https://raw.githubusercontent.com/tengbao/vanta/f8b351906688b56f0fc744e53bde81fc3c56f150/src/_shaderBase.js",
+      "bytes": 2587,
+      "sha256": "c4bc571a8d5e5c8363dfc05f0b98236013100425a9c744417c84f2500dc9b7ba"
+    },
+    {
+      "path": "src/helpers.js",
+      "url": "https://raw.githubusercontent.com/tengbao/vanta/f8b351906688b56f0fc744e53bde81fc3c56f150/src/helpers.js",
+      "bytes": 2040,
+      "sha256": "74c3b6b3b10085c8bde6987ab8747b4d854dfec8d776cead17bbf9d0ee6fdb97"
+    },
+    {
+      "path": "dist/vanta.clouds.min.js",
+      "url": "https://raw.githubusercontent.com/tengbao/vanta/f8b351906688b56f0fc744e53bde81fc3c56f150/dist/vanta.clouds.min.js",
+      "bytes": 15275,
+      "sha256": "97ae7dac61b9d1aae2849e948e0e5c1eac87e4871d65cce580270015ce59d7f9"
+    },
+    {
+      "path": "dist/vanta.clouds2.min.js",
+      "url": "https://raw.githubusercontent.com/tengbao/vanta/f8b351906688b56f0fc744e53bde81fc3c56f150/dist/vanta.clouds2.min.js",
+      "bytes": 11491,
+      "sha256": "a0f944ef40ca2356f8368e714a903d49104d4d39f524e3a597caeabf9cb9a9d9"
+    },
+    {
+      "path": "dist/vanta.fog.min.js",
+      "url": "https://raw.githubusercontent.com/tengbao/vanta/f8b351906688b56f0fc744e53bde81fc3c56f150/dist/vanta.fog.min.js",
+      "bytes": 12561,
+      "sha256": "1345d4adec9907454607a134454c686ac527d2d75efa1e50fc9a94d802177bca"
+    }
+  ],
+  "limitations": [
+    "Not a standalone runnable demo: THREE must be installed for runtime. CLOUDS2 additionally needs a noise texture; gallery/noise.png is not present in the captured master tree."
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "retrievedAt": "2026-10-15",
+  "shadcn": {
+    "cliVersion": "4.21.5",
+    "registryStyle": "new-york / Radix",
+    "source": "https://ui.shadcn.com/r/styles/new-york/",
+    "license": "MIT",
+    "localModifications": "无；仅在应用层通过 className 与主题变量配置。"
+  },
+  "reactBits": {
+    "source": "https://reactbits.dev/r/TiltedCard-TS-CSS.json",
+    "repository": "https://github.com/DavidHDev/react-bits",
+    "commit": "43591e8b3fa327d45633b4e8239ff6742ef706ef",
+    "license": "MIT + Commons Clause",
+    "localModifications": "无；TiltedCard TSX/CSS、BlurText TSX 与固定 commit SHA-256 一致。",
+    "components": [
+      "TiltedCard",
+      "BlurText"
+    ]
+  },
+  "files": {
+    "src/components/ui/aspect-ratio.tsx": "3ce0684d13f8572abbd3c46fc0beb613ad2d0821ab978480f8576c9a394f03d5",
+    "src/components/ui/alert-dialog.tsx": "f22f5b24314e0f6d77e2f7b3b0ac494b82fd685f93a1e64bebc75d2445871074",
+    "src/components/ui/tabs.tsx": "1bb52d8082f7518a9712f1431c531217697eb2fc91cbebc534b792003b8dc767",
+    "src/components/ui/card.tsx": "ef8305b12c3112dab42a4708b41b1ebcc042fa5ab4c20f039da8d45b09ed5059",
+    "src/components/ui/slider.tsx": "6a531f6182de6efec2c25d30a7626b66cbf11cf52d505e47f907124934f7188e",
+    "src/components/ui/sheet.tsx": "7e4e3e2a5976ad75c1e0f63624fb3748ad84b27ca1ec85c0a6d33e6f300dc80d",
+    "src/components/ui/scroll-area.tsx": "8b73bb9be51300079c7f561bafbe43ee10f6f464cf39c8c1b25123cd4edb94dd",
+    "src/components/ui/label.tsx": "b823de7355666bd6a6a2cf88a6630e436d021b38fdbef5b749fac0921b86f44d",
+    "src/components/ui/sonner.tsx": "a3868f2a8aafd8e2dc96b7ae145009939e9d8723cbb5a4b61d7b7d9bed9df478",
+    "src/components/ui/alert.tsx": "d03dcae5cdb63c381c1144ca9a0c49ba0e46466967d7deb94662034042acb034",
+    "src/components/ui/switch.tsx": "b43b0fd1a9a753d9aa777eeab68e468d37fa18a7ef74341c616c204160ea0390",
+    "src/components/ui/dialog.tsx": "dcd488cc5d713da215ce2037efd644f35904df755c70f31534706643db488514",
+    "src/components/ui/table.tsx": "bd1a9fc83a5a2149e504038e274bb7e5a0351af59f6896df52ac4d5b439695ac",
+    "src/components/ui/button.tsx": "79dd6f75f8136394442202d6b8b922fb269eaad0a5dba579397c9d5b41f893bb",
+    "src/components/ui/select.tsx": "962830436bd0b7ee50e556f0747e277d6a86869ed27d167516346b15f26309d8",
+    "src/components/ui/textarea.tsx": "5cafcfeeee29534f449387a16b585f5923d2faab1a0cdc50a874416b175f59ce",
+    "src/components/ui/input.tsx": "0c9457181f6ddc80969bcf854e92c362903a55b6e889fbef3fd85343ecc4af5b",
+    "src/components/vendor/react-bits/LICENSE.md": "f4c33af6739191537738662d223b68d77bc226f4b57ea883e16481d8cc5c73c9",
+    "src/components/vendor/react-bits/BlurText.tsx": "ff976389990b9f25376ad491dabd66262913cc574151d54f205fcd4ca05d7ed6",
+    "src/components/vendor/react-bits/TiltedCard.tsx": "ca6b76a91a87659987c872b8a000e8776bc885d70aeeded46da9b9645554e07e",
+    "src/components/vendor/react-bits/TiltedCard.css": "6214acb092fd97b67af30712ae7d53590bd65ee695c79867410dbed68a042904"
+  },
+  "version": "0.2.0"
+}

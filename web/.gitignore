@@ -1,0 +1,40 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Browser test output
+test-results/
+evidence/playwright-report/
+evidence/playwright-*-report/
+
+.player-build/
+public/player/
+public/player-runtime.zip
+
+# 本地验收截图与运行包：保留在本机，不进 GitHub（README 指向 GitHub Releases）
+evidence/
+releases/
+
+# 脚本运行临时目录
+tmpfont/

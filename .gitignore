@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# 编辑器
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.sw?
+
+# 日志
+*.log
+logs/
+
+# 子项目自带 web/.gitignore
+node_modules

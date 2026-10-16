@@ -1,0 +1,20 @@
+[
+  {"id":"title","name":"只说一句","description":"1 个主标题 · 纯文字","headings":1,"texts":0,"photos":0,"composition":"opening","align":"center"},
+  {"id":"statement","name":"两行主张","description":"2 个主标题 + 1 段小文本","headings":2,"texts":1,"photos":0,"composition":"opening","align":"center"},
+  {"id":"story","name":"一段叙事","description":"1 个主标题 + 2 段小文本","headings":1,"texts":2,"photos":0,"composition":"opening","align":"left"},
+  {"id":"image","name":"一张照片","description":"1 张图片 · 无文字","headings":0,"texts":0,"photos":1,"composition":"editorial","align":"left"},
+  {"id":"caption","name":"一图一文","description":"1 个主标题 + 1 段小文本 + 1 张图","headings":1,"texts":1,"photos":1,"composition":"editorial","align":"left"},
+  {"id":"caption-story","name":"一图叙事","description":"1 个主标题 + 2 段小文本 + 1 张图","headings":1,"texts":2,"photos":1,"composition":"editorial","align":"left"},
+  {"id":"pair","name":"双图对话","description":"1 个主标题 + 1 段小文本 + 2 张图","headings":1,"texts":1,"photos":2,"composition":"editorial","align":"left"},
+  {"id":"duet","name":"双图叙事","description":"2 个主标题 + 2 段小文本 + 2 张图","headings":2,"texts":2,"photos":2,"composition":"editorial","align":"left"},
+  {"id":"trio","name":"三图灵感","description":"2 个主标题 + 2 段小文本 + 3 张图","headings":2,"texts":2,"photos":3,"composition":"opening","align":"left"},
+  {"id":"quartet","name":"四图故事","description":"1 个主标题 + 1 段小文本 + 4 张图","headings":1,"texts":1,"photos":4,"composition":"gallery","align":"left"},
+  {"id":"gallery","name":"六图画廊","description":"1 个主标题 + 1 段小文本 + 6 张图","headings":1,"texts":1,"photos":6,"composition":"gallery","align":"left"},
+  {"id":"cinema","name":"影像时刻","description":"1 个主标题 + 1 段小文本 + 视频","headings":1,"texts":1,"photos":0,"composition":"cinema","align":"left"},
+  {"id":"cinema-quote","name":"影像主张","description":"2 个主标题 + 1 段小文本 + 视频","headings":2,"texts":1,"photos":0,"composition":"cinema","align":"left"},
+  {"id":"film","name":"纯影像","description":"整屏视频 · 无文字","headings":0,"texts":0,"photos":0,"composition":"cinema","align":"left"},
+  {"id":"chart-line","name":"趋势图表","description":"1 个主标题 + 1 段小文本 + 折线图","headings":1,"texts":1,"photos":0,"composition":"chart","align":"left"},
+  {"id":"chart-full","name":"一页图表","description":"整屏折线图 · 配说明脚注","headings":0,"texts":1,"photos":0,"composition":"chart","align":"center"},
+  {"id":"outro","name":"结尾收束","description":"2 个主标题 · 落幕渐暗到黑","headings":2,"texts":0,"photos":0,"composition":"outro","align":"center"},
+  {"id":"table","name":"信息对照","description":"1 个主标题 + 2 段小文本 + 表格","headings":1,"texts":2,"photos":0,"composition":"table","align":"left"}
+]
