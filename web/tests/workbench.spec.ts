@@ -248,6 +248,8 @@ test("氛围配色、灵动开关和背景暂停刷新恢复", async ({ page }) 
     .getByRole("switch", { name: "这一屏的灵动效果", exact: true })
     .click();
   await saved(page);
+  // 保存后到 reload 之间任何 pending useEffect 都得有机会 flush
+  await page.waitForTimeout(200);
   await page.reload();
   await edit(page);
   await page.getByRole("tab", { name: "灵动", exact: true }).click();

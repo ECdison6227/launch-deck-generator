@@ -83,6 +83,9 @@ const swiperEffects = {
 export const Experience = forwardRef<ExperienceHandle, { project: Project; urls: Record<string, string>; editing?: boolean; activeIndex: number; onIndexChange: (index: number) => void; keyboard?: boolean }>(function Experience({ project, urls, editing = false, activeIndex, onIndexChange, keyboard = true }, ref) {
   const swiperRef = useRef<SwiperInstance | null>(null)
   const [replay, setReplay] = useState(0)
+  // 编辑状态下点「重新感受这一屏」：短暂允许动效，播完自动回归"编辑时静止"，并保持编辑框打开。
+  const [forcePlay, setForcePlay] = useState(false)
+  const forceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [reduced, setReduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -90,9 +93,22 @@ export const Experience = forwardRef<ExperienceHandle, { project: Project; urls:
     media.addEventListener('change', change)
     return () => media.removeEventListener('change', change)
   }, [])
+  // 编辑模式切换时取消预览态；离开页面时清理定时器。
+  useEffect(() => () => { if (forceTimer.current) clearTimeout(forceTimer.current) }, [])
+  useEffect(() => { if (!editing) setForcePlay(false) }, [editing])
   const transitionSpeed = reduced ? 0 : project.transition === 'fade' ? 450 : 850
   useEffect(() => { if (swiperRef.current && swiperRef.current.activeIndex !== activeIndex) swiperRef.current.slideTo(activeIndex, editing ? 0 : transitionSpeed) }, [activeIndex, editing, transitionSpeed])
-  useImperativeHandle(ref, () => ({ next: () => swiperRef.current?.slideNext(), previous: () => swiperRef.current?.slidePrev(), goTo: index => swiperRef.current?.slideTo(index), replay: () => setReplay(n => n + 1) }), [])
+  useImperativeHandle(ref, () => ({
+    next: () => swiperRef.current?.slideNext(),
+    previous: () => swiperRef.current?.slidePrev(),
+    goTo: index => swiperRef.current?.slideTo(index),
+    replay: () => {
+      setReplay(n => n + 1)
+      setForcePlay(true)
+      if (forceTimer.current) clearTimeout(forceTimer.current)
+      forceTimer.current = setTimeout(() => setForcePlay(false), 3500)
+    },
+  }), [])
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement
@@ -106,7 +122,7 @@ export const Experience = forwardRef<ExperienceHandle, { project: Project; urls:
   return <div className={`experience transition-${project.transition} ${editing ? 'experience-editing' : ''}`} data-testid="experience">
     <AmbientBackground project={project} reduced={reduced} />
     <div className="experience-pages"><Swiper key={project.transition} modules={[A11y, Keyboard, Mousewheel, ...effect.modules]} direction={project.transition === 'cards' ? 'horizontal' : 'vertical'} speed={transitionSpeed} initialSlide={activeIndex} keyboard={{ enabled: keyboard && !editing }} mousewheel={{ enabled: keyboard && !editing, forceToAxis: project.transition !== 'cards', thresholdDelta: 35, thresholdTime: 750 }} allowTouchMove={!editing} {...effect.props} onSwiper={swiper => { swiperRef.current = swiper }} onBeforeSlideChangeStart={pauseMedia} onSlideChange={swiper => { pauseMedia(); onIndexChange(swiper.activeIndex) }} a11y={{ enabled: true, containerMessage: '流动网页，使用方向键切换场景', slideLabelMessage: '第 {{index}} 屏，共 {{slidesLength}} 屏' }}>
-      {project.scenes.map(scene => <SwiperSlide key={scene.id}>{({ isActive }) => isActive ? <SceneContent key={`${scene.id}-${replay}`} scene={scene} urls={urls} animate={!editing} replay={replay} reduced={reduced} /> : null}</SwiperSlide>)}
+      {project.scenes.map(scene => <SwiperSlide key={scene.id}>{({ isActive }) => isActive ? <SceneContent key={`${scene.id}-${replay}`} scene={scene} urls={urls} animate={!editing || forcePlay} replay={replay} reduced={reduced} /> : null}</SwiperSlide>)}
     </Swiper></div>
   </div>
 })
